@@ -1,7 +1,7 @@
 module Main exposing (..)
 
-import Html exposing (Html, button, div, form, input, li, text, ul)
-import Html.Attributes exposing (class, type_, value)
+import Html exposing (Html, a, button, div, form, input, li, p, text, ul)
+import Html.Attributes exposing (class, href, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 
 
@@ -18,20 +18,37 @@ type alias Id =
 
 
 type alias Todo =
-    { id : Id, title : String, state : State }
+    { id : Id
+    , title : String
+    , state : State
+    }
 
 
 type alias NextTodoId =
     Int
 
 
+type Filter
+    = ShowAll
+    | ShowActive
+    | ShowCompleted
+
+
 type alias Model =
-    { todos : List Todo, currentValue : String, nextTodoId : NextTodoId }
+    { todos : List Todo
+    , currentValue : String
+    , nextTodoId : NextTodoId
+    , currentFilter : Filter
+    }
 
 
 initialModel : Model
 initialModel =
-    { todos = [], currentValue = "", nextTodoId = 1 }
+    { todos = []
+    , currentValue = ""
+    , nextTodoId = 1
+    , currentFilter = ShowAll
+    }
 
 
 init : ( Model, Cmd Msg )
@@ -47,6 +64,7 @@ type Msg
     = Change String
     | Add
     | ToggleTodo Id
+    | ShowFilter Filter
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -63,6 +81,9 @@ update msg model =
 
         ToggleTodo id ->
             ( toggleTodo id model, Cmd.none )
+
+        ShowFilter filter ->
+            ( { model | currentFilter = filter }, Cmd.none )
 
 
 addTodo : Model -> Model
@@ -112,6 +133,7 @@ view model =
     div []
         [ addTodoForm model
         , todoList model
+        , filter model
         ]
 
 
@@ -126,11 +148,23 @@ addTodoForm model =
 
 todoList : Model -> Html Msg
 todoList model =
+    let
+        filteredTodos =
+            case model.currentFilter of
+                ShowAll ->
+                    model.todos
+
+                ShowActive ->
+                    List.filter (\todo -> todo.state == Active) model.todos
+
+                ShowCompleted ->
+                    List.filter (\todo -> todo.state == Completed) model.todos
+    in
     ul
         []
         (List.map
             (\todo -> todoLi todo)
-            model.todos
+            filteredTodos
         )
 
 
@@ -149,6 +183,25 @@ todoLi todo =
     li
         [ class <| liClass todo, onClick <| ToggleTodo todo.id ]
         [ text todo.title ]
+
+
+filter : Model -> Html Msg
+filter model =
+    div
+        [ class "filter-list" ]
+        [ p [] [ text "Show: " ]
+        , showFilter ShowAll model
+        , showFilter ShowActive model
+        , showFilter ShowCompleted model
+        ]
+
+
+showFilter : Filter -> Model -> Html Msg
+showFilter filter model =
+    if filter == model.currentFilter then
+        p [ class "selected" ] [ text <| toString filter ]
+    else
+        p [ class "not-selected", onClick <| ShowFilter filter ] [ text <| toString filter ]
 
 
 

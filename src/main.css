@@ -11,3 +11,20 @@ li {
 li.completed {
   text-decoration: line-through;
 }
+
+.filter-list {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 350px;
+}
+
+p.not-selected {
+  cursor: pointer;
+  color: #3f87a6;
+}
+
+p.selected {
+  cursor: auto;
+  color: #ccc;
+}
