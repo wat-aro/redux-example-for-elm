@@ -199,9 +199,22 @@ filter model =
 showFilter : Filter -> Model -> Html Msg
 showFilter filter model =
     if filter == model.currentFilter then
-        p [ class "selected" ] [ text <| toString filter ]
+        p [ class "selected" ] [ text <| show filter ]
     else
-        p [ class "not-selected", onClick <| ShowFilter filter ] [ text <| toString filter ]
+        p [ class "not-selected", onClick <| ShowFilter filter ] [ text <| show filter ]
+
+
+show : Filter -> String
+show filter =
+    case filter of
+        ShowAll ->
+            "All"
+
+        ShowActive ->
+            "Active"
+
+        ShowCompleted ->
+            "Completed"
 
 
 
